@@ -131,7 +131,12 @@ export class ScriptAstBuilder {
     let character: string | undefined;
 
     const firstLine = lines[i]?.trim();
-    if (firstLine && !this.isTypeLine(firstLine) && !firstLine.startsWith("#") && !firstLine.startsWith(">")) {
+    if (
+      firstLine &&
+      !this.isTypeLine(firstLine) &&
+      !firstLine.startsWith("#") &&
+      !firstLine.startsWith(">")
+    ) {
       // 角色名检测：冒号前不能包含格式标记字符 { } * = |
       const charMatch = firstLine.match(/^([^:{}*=|]+):/);
       if (charMatch && charMatch[1].trim().length > 0) {
@@ -155,7 +160,9 @@ export class ScriptAstBuilder {
     }
 
     return {
-      lines: [{ type: "dialogue", character, nodes: parseText(parts.join("\n")) }],
+      lines: [
+        { type: "dialogue", character, nodes: parseText(parts.join("\n")) },
+      ],
       consumed: i - startIndex,
     };
   }
@@ -237,7 +244,7 @@ export class ScriptAstBuilder {
 
     while (i < lines.length) {
       const line = lines[i].trim();
-      if (!line || !line.startsWith("-")) break;
+      if (!line?.startsWith("-")) break;
 
       const linkMatch = line.match(/-\s*\[([^\]]+)\]\(([^)]+)\)/);
       if (!linkMatch) {
@@ -251,7 +258,12 @@ export class ScriptAstBuilder {
       if (subMatch) {
         const subId = subMatch[1];
         if (!subSegments.has(subId)) {
-          throw new ParseError(`未找到子片段: #${subId}`, i, undefined, segmentId);
+          throw new ParseError(
+            `未找到子片段: #${subId}`,
+            i,
+            undefined,
+            segmentId,
+          );
         }
         // 递归解析子片段的行内容
         const subLines = this.parseLines(
@@ -303,15 +315,18 @@ export class ScriptAstBuilder {
 
     switch (cmd) {
       case "setFlag":
-        if (parts.length < 2) throw new ParseError("setFlag 需要指定flag名称", index);
+        if (parts.length < 2)
+          throw new ParseError("setFlag 需要指定flag名称", index);
         params.flag = parts.slice(1).join(" ");
         break;
       case "unsetFlag":
-        if (parts.length < 2) throw new ParseError("unsetFlag 需要指定flag名称", index);
+        if (parts.length < 2)
+          throw new ParseError("unsetFlag 需要指定flag名称", index);
         params.flag = parts.slice(1).join(" ");
         break;
       case "jump":
-        if (parts.length < 2) throw new ParseError("jump 需要指定目标片段ID", index);
+        if (parts.length < 2)
+          throw new ParseError("jump 需要指定目标片段ID", index);
         params.segmentId = parts.slice(1).join(" ");
         break;
       case "end":
@@ -322,7 +337,17 @@ export class ScriptAstBuilder {
     }
 
     return {
-      lines: [{ type: "command", command: cmd as ContentLine & { type: "command" } extends { command: infer C } ? C : never, params }],
+      lines: [
+        {
+          type: "command",
+          command: cmd as ContentLine & { type: "command" } extends {
+            command: infer C;
+          }
+            ? C
+            : never,
+          params,
+        },
+      ],
       consumed,
     };
   }
@@ -330,6 +355,8 @@ export class ScriptAstBuilder {
   // ── 工具 ──────────────────────────────────────────────
 
   private isTypeLine(line: string): boolean {
-    return /^(narration|dialogue|input|timeDisplayLine|choice|command)/i.test(line);
+    return /^(narration|dialogue|input|timeDisplayLine|choice|command)/i.test(
+      line,
+    );
   }
 }

@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.1",
-    "vue": "^3.4.21"
+    "vue": "^3.5.33"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.6",
-    "@vitejs/plugin-vue": "^5.0.4",
-    "typescript": "^5.4.2",
-    "vite": "^5.2.0",
-    "vue-tsc": "^2.0.6"
+    "@biomejs/biome": "^2.4.14",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vue-tsc": "^3.2.8"
   }
 }

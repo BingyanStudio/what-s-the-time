@@ -5,8 +5,8 @@
  * 使用 Vite 的 import.meta.glob 在构建时收集所有 .md 文件。
  */
 
-import type { ScriptSegment } from "@/types";
 import { ScriptParser } from "@/parser";
+import type { ScriptSegment } from "@/types";
 
 const parser = new ScriptParser({ enableCache: true });
 

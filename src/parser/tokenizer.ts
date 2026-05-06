@@ -76,8 +76,13 @@ export class ScriptTokenizer {
       throw new ParseError("片段缺少YAML元数据块", index);
     }
 
-    const metadata = parseYamlFrontMatter(frontMatter, `segment-${index}`, index);
-    const { mainContent, subSegments } = this.extractSubSegments(remainingContent);
+    const metadata = parseYamlFrontMatter(
+      frontMatter,
+      `segment-${index}`,
+      index,
+    );
+    const { mainContent, subSegments } =
+      this.extractSubSegments(remainingContent);
 
     return { metadata, content: mainContent, subSegments };
   }

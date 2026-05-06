@@ -18,10 +18,20 @@ export function parseYamlFrontMatter(
     }) as Record<string, unknown>;
 
     if (!parsed.id) {
-      throw new ParseError("Missing required field: id", lineNumber, undefined, segmentId);
+      throw new ParseError(
+        "Missing required field: id",
+        lineNumber,
+        undefined,
+        segmentId,
+      );
     }
     if (!parsed.time) {
-      throw new ParseError("Missing required field: time", lineNumber, undefined, segmentId);
+      throw new ParseError(
+        "Missing required field: time",
+        lineNumber,
+        undefined,
+        segmentId,
+      );
     }
 
     const metadata: SegmentMetadata = {

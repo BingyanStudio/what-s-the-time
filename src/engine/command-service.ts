@@ -49,7 +49,9 @@ class CommandService {
     if (nextIndex < displayState.displayedLines.length) {
       stateStore.updateDisplayState({
         currentLineIndex: nextIndex,
-        pendingSideEffects: [{ type: "startTyping", target: nextIndex, delay: 0 }],
+        pendingSideEffects: [
+          { type: "startTyping", target: nextIndex, delay: 0 },
+        ],
       });
     }
   }

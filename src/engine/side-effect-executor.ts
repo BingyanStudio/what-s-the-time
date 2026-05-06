@@ -63,7 +63,8 @@ class SideEffectExecutor {
     } else {
       // 组件可能还未挂载，延迟重试
       setTimeout(() => {
-        const comp = stateStore._internal.displayState.typingRefs.get(lineIndex);
+        const comp =
+          stateStore._internal.displayState.typingRefs.get(lineIndex);
         if (comp?.startTyping) {
           comp.startTyping();
         }

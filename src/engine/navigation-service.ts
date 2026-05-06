@@ -4,8 +4,8 @@
  * 管理片段间的导航和时间匹配。
  */
 
-import type { DisplayedLine, LineStatus, ScriptSegment } from "@/types";
 import { findSegment, findSegmentById, getStartSegment } from "@/data";
+import type { DisplayedLine, LineStatus, ScriptSegment } from "@/types";
 import { stateStore } from "./state-store";
 
 class NavigationService {
@@ -19,7 +19,11 @@ class NavigationService {
   /** 导航到时间对应的片段 */
   navigateToTime(time: string): void {
     const { gameState } = stateStore._internal;
-    const segment = findSegment(time, gameState.unlockedFlags, gameState.viewedSegments);
+    const segment = findSegment(
+      time,
+      gameState.unlockedFlags,
+      gameState.viewedSegments,
+    );
 
     if (segment) {
       gameState.viewedSegments.add(segment.id);
@@ -43,7 +47,9 @@ class NavigationService {
 
   private loadSegment(segment: ScriptSegment): void {
     const lineStates = stateStore._internal.lineStates;
-    segment.lines.forEach((_, i) => lineStates.delete(`${segment.id}-${i}`));
+    for (let i = 0; i < segment.lines.length; i++) {
+      lineStates.delete(`${segment.id}-${i}`);
+    }
 
     const displayedLines: DisplayedLine[] = segment.lines.map((line, i) => ({
       ...line,

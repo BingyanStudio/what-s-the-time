@@ -5,7 +5,12 @@
  * 选择后将内联行插入到当前显示列表中。
  */
 
-import type { ChoiceLine, ContentLine, DisplayedLine, LineStatus } from "@/types";
+import type {
+  ChoiceLine,
+  ContentLine,
+  DisplayedLine,
+  LineStatus,
+} from "@/types";
 import { stateStore } from "./state-store";
 
 class ChoiceService {
@@ -19,7 +24,9 @@ class ChoiceService {
     const status = lineStates.get(lineId);
     if (status === "completed" || status === "disabled") return;
 
-    const lineIndex = displayState.displayedLines.findIndex((l) => l.id === lineId);
+    const lineIndex = displayState.displayedLines.findIndex(
+      (l) => l.id === lineId,
+    );
     if (lineIndex === -1) return;
 
     // 标记行为已完成
@@ -63,11 +70,16 @@ class ChoiceService {
     stateStore.updateDisplayState({
       displayedLines,
       currentLineIndex: lineIndex + 1,
-      pendingSideEffects: [{ type: "startTyping", target: lineIndex + 1, delay: 0 }],
+      pendingSideEffects: [
+        { type: "startTyping", target: lineIndex + 1, delay: 0 },
+      ],
     });
   }
 
-  private createDisplayedLines(lines: ContentLine[], baseIndex: number): DisplayedLine[] {
+  private createDisplayedLines(
+    lines: ContentLine[],
+    baseIndex: number,
+  ): DisplayedLine[] {
     return lines.map((line, index) => ({
       ...line,
       id: `inserted-${baseIndex}-${index}`,

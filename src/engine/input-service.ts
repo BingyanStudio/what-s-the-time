@@ -12,7 +12,9 @@ import { stateStore } from "./state-store";
 class InputService {
   handleInputComplete(time: string, lineId: string): void {
     const { displayState } = stateStore._internal;
-    const lineIndex = displayState.displayedLines.findIndex((l) => l.id === lineId);
+    const lineIndex = displayState.displayedLines.findIndex(
+      (l) => l.id === lineId,
+    );
     if (lineIndex === -1) return;
 
     const line = displayState.displayedLines[lineIndex];

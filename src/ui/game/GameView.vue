@@ -51,9 +51,9 @@ import {
   timeChoiceService,
 } from "@/engine";
 import type { ChoiceLine, CommandLine, DisplayedLine } from "@/types";
-import BackToStartButton from "./BackToStartButton.vue";
-import LineRenderer from "@/ui/lines/LineRenderer.vue";
 import WatchDisplay from "@/ui/display/WatchDisplay.vue";
+import LineRenderer from "@/ui/lines/LineRenderer.vue";
+import BackToStartButton from "./BackToStartButton.vue";
 
 const displayState = computed(() => stateStore.displayState);
 const gameState = computed(() => stateStore.gameState);
@@ -118,14 +118,14 @@ const handleSetTypingRef = (el: unknown, index: number) => {
   displayService.setTypingRef(el, index);
 };
 
-const handleChoice = (choice: ChoiceLine["choices"][0], lineIndex: number, choiceIndex: number) => {
+const handleChoice = (
+  choice: ChoiceLine["choices"][0],
+  lineIndex: number,
+  choiceIndex: number,
+) => {
   const line = displayState.value.displayedLines[lineIndex];
   if (line) {
-    choiceService.handleChoice(
-      choice,
-      line.id,
-      choiceIndex,
-    );
+    choiceService.handleChoice(choice, line.id, choiceIndex);
   }
 };
 
@@ -158,7 +158,13 @@ const onLineComplete = () => {
   if (nextIndex >= displayedLines.length) return;
 
   const nextLine = displayedLines[nextIndex];
-  const autoAdvanceTypes = ["command", "input", "choice", "timeChoice", "timeDisplay"];
+  const autoAdvanceTypes = [
+    "command",
+    "input",
+    "choice",
+    "timeChoice",
+    "timeDisplay",
+  ];
   if (autoAdvanceTypes.includes(nextLine.type)) {
     displayService.showNextLine();
   }
@@ -170,7 +176,8 @@ const { handleGlobalKeyDown, handleTextClick } = useKeyboardNavigation({
   backToStart,
   isAllLinesComplete: shouldShowBackButton,
   skipCurrentLine: () => displayService.skipCurrentLine(),
-  getTypingComponent: (index: number) => displayService.getTypingComponent(index),
+  getTypingComponent: (index: number) =>
+    displayService.getTypingComponent(index),
   currentLineIndex: computed(() => displayState.value.currentLineIndex),
   displayedLines: computed(() => displayState.value.displayedLines),
 });

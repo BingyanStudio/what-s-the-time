@@ -1,4 +1,4 @@
-import { nextTick, ref } from "vue";
+import { type ComponentPublicInstance, nextTick, ref } from "vue";
 import { useMechanicalSound } from "@/composables/useMechanicalSound";
 import {
   TIME_INPUT_FORMAT,
@@ -192,7 +192,11 @@ export function useTimeInput(options: UseTimeInputOptions) {
   /**
    * 设置输入框 ref
    */
-  const setRef = (el: HTMLInputElement | null, index: number) => {
+  const setRef = (
+    el: Element | ComponentPublicInstance | null,
+    index: number,
+  ) => {
+    if (el && !(el instanceof HTMLInputElement)) return;
     if (el) {
       refs.value[index] = el;
     }

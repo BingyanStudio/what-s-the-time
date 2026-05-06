@@ -78,7 +78,11 @@ defineProps<{
 defineEmits<{
   "set-typing-ref": [el: unknown, index: number];
   "line-complete": [];
-  "choice-select": [choice: ChoiceOption, lineIndex: number, choiceIndex: number];
+  "choice-select": [
+    choice: ChoiceOption,
+    lineIndex: number,
+    choiceIndex: number,
+  ];
   "time-choice-complete": [time: string, lineIndex: number];
   "input-complete": [time: string, lineIndex: number];
   "command-execute": [command: CommandLineType, lineIndex: number];

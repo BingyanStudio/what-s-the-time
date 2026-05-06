@@ -4,7 +4,7 @@
  * 组合 Tokenizer + AstBuilder，提供统一的解析接口。
  */
 
-import type { ParserOptions, ParseResult, ScriptSegment } from "@/types";
+import type { ParseResult, ParserOptions, ScriptSegment } from "@/types";
 import { ScriptAstBuilder } from "./ast-builder";
 import { ScriptTokenizer } from "./tokenizer";
 

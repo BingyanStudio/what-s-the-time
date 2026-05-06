@@ -5,8 +5,8 @@
  * 匹配后替换为 timeDisplay 行并插入内联后续内容。
  */
 
-import type { ContentLine, DisplayedLine, LineStatus } from "@/types";
 import { useSystemTime } from "@/composables/useSystemTime";
+import type { ContentLine, DisplayedLine, LineStatus } from "@/types";
 import { stateStore } from "./state-store";
 
 class TimeChoiceService {
@@ -25,9 +25,18 @@ class TimeChoiceService {
     // 查找匹配的选项
     let matched: (typeof line)["choices"][0] | null = null;
     for (const choice of line.choices) {
-      if (choice.time === "*") { matched = choice; break; }
-      if (choice.time === "NOW" && time === systemTime) { matched = choice; break; }
-      if (choice.time === time) { matched = choice; break; }
+      if (choice.time === "*") {
+        matched = choice;
+        break;
+      }
+      if (choice.time === "NOW" && time === systemTime) {
+        matched = choice;
+        break;
+      }
+      if (choice.time === time) {
+        matched = choice;
+        break;
+      }
     }
     if (!matched) return;
 
@@ -40,10 +49,15 @@ class TimeChoiceService {
       stateStore.updateGameState({ unlockedFlags: flags });
     }
 
-    gameState.choiceHistory.push({ choiceText: `时间: ${time}`, timestamp: Date.now() });
+    gameState.choiceHistory.push({
+      choiceText: `时间: ${time}`,
+      timestamp: Date.now(),
+    });
 
     // 替换 timeChoice 为 timeDisplay + 插入内联行
-    const lineIndex = displayState.displayedLines.findIndex((l) => l.id === lineId);
+    const lineIndex = displayState.displayedLines.findIndex(
+      (l) => l.id === lineId,
+    );
     if (lineIndex === -1) return;
 
     const displayedLines = [...displayState.displayedLines];
@@ -65,11 +79,16 @@ class TimeChoiceService {
     stateStore.updateDisplayState({
       displayedLines,
       currentLineIndex: insertIndex,
-      pendingSideEffects: [{ type: "startTyping", target: insertIndex, delay: 0 }],
+      pendingSideEffects: [
+        { type: "startTyping", target: insertIndex, delay: 0 },
+      ],
     });
   }
 
-  private createDisplayedLines(lines: ContentLine[], baseIndex: number): DisplayedLine[] {
+  private createDisplayedLines(
+    lines: ContentLine[],
+    baseIndex: number,
+  ): DisplayedLine[] {
     return lines.map((line, index) => ({
       ...line,
       id: `inserted-${baseIndex}-${index}`,
