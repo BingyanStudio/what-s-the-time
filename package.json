@@ -1,0 +1,24 @@
+{
+  "name": "whats-the-time",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "format": "biome format --fix ."
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.4.2",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6"
+  }
+}
