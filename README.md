@@ -1,173 +1,43 @@
 # What's the time
 
-一个多周目文字冒险游戏，使用 Bun + TypeScript + Vue 开发。
+一个使用 Bun、TypeScript、React 与 Vite 开发的多周目文字冒险游戏。
 
-## 项目结构
-
-```
-src/
-├── components/          # Vue 组件
-│   ├── GameView.vue    # 游戏主界面
-│   └── FormattedText.vue # 格式化文本渲染组件
-├── composables/         # Vue Composables
-│   └── useGameState.ts # 游戏状态管理
-├── data/               # 剧本数据
-│   └── script.ts       # 剧本片段定义
-├── types/              # TypeScript 类型定义
-│   └── index.ts
-├── utils/              # 工具函数
-│   └── textParser.ts   # 文本格式解析器
-├── img/                # 图片资源
-│   └── watch.png       # 手表图片
-├── App.vue             # 根组件
-├── main.ts             # 入口文件
-└── style.css           # 全局样式
-```
-
-## 安装和运行
+## 开发
 
 ```bash
-# 安装依赖
 bun install
-
-# 开发模式
 bun run dev
+```
 
-# 构建
+开发服务器默认运行在 `http://localhost:3000`。
+
+```bash
+bun test
+bun run lint
 bun run build
 ```
 
-## 剧本编写指南
+## 项目结构
 
-剧本数据定义在 `src/data/script.ts` 中，使用 TypeScript 直接编写。
-
-### 基本结构
-
-每个剧本片段（ScriptSegment）包含：
-- `id`: 片段唯一标识
-- `time`: 时间点 (HH:MM)
-- `secondTime`: 第二问时间（用于两问一锁机制，可选）
-- `lines`: 剧本行列表
-- `description`: 片段描述（用于开发调试）
-- `unlockFlags`: 解锁条件（flag 列表）
-- `loop`: Loop 阶段
-
-### 剧本行类型
-
-#### 1. 场景描述 (NarrationLine)
-
-```typescript
-{
-  type: 'narration',
-  text: '早晨的上学路。阳光透过树叶洒下来。'
-}
+```text
+src/
+├── data/       # Markdown 剧本加载
+├── engine/     # 框架无关的游戏状态与业务服务
+├── hooks/      # React 状态、时间、音效和交互 Hook
+├── parser/     # 剧本解析器及测试
+├── types/      # 共享类型
+├── ui/         # React 游戏组件
+├── App.tsx
+└── main.tsx
 ```
 
-#### 2. 对话 (DialogueLine)
+游戏代码以 `src/` 为唯一事实来源，剧本格式说明见
+`docs/wiki-docs/技术/剧本格式.md`。
 
-```typescript
-{
-  type: 'dialogue',
-  character: 'B',  // 角色名（可选，为空表示内心独白）
-  text: '一年前那件事，你现在还好吗？'
-}
-```
+## Agentation
 
-#### 3. 选择分支 (ChoiceLine)
+Agentation 已作为开发依赖接入根组件，只会在 Vite 开发模式加载，不会进入生产构建。
 
-```typescript
-{
-  type: 'choice',
-  choices: [
-    {
-      text: '选项1',
-      targetSegmentId: 'P03-02',
-      setFlag: 'choice_1'  // 可选
-    },
-    {
-      text: '选项2',
-      targetSegmentId: 'P03-03'
-    }
-  ]
-}
-```
+运行 `bun run dev` 后，桌面浏览器右下角会出现 Agentation 工具栏。启用工具栏并点击页面元素即可添加批注；复制生成的结构化 Markdown 后，可以直接交给编码 Agent 定位组件、选择器和页面区域。
 
-### 文本格式标记
-
-支持以下格式标记：
-- `{red}红色文本{/red}` - 红色文本
-- `{bold}粗体文本{/bold}` - 粗体
-- `{italic}斜体文本{/italic}` - 斜体
-- `{br}` - 换行
-
-示例：
-```typescript
-{
-  type: 'narration',
-  text: '时间戳：{bold}08:20{/bold}'
-}
-```
-
-### 完整示例
-
-```typescript
-{
-  id: 'P03-01',
-  time: '08:05',
-  description: '和 B 一起上学（伪恋爱开场）',
-  loop: 'A',
-  unlockFlags: [],
-  lines: [
-    {
-      type: 'narration',
-      text: '早晨的上学路。阳光透过树叶洒下来。'
-    },
-    {
-      type: 'dialogue',
-      character: 'B',
-      text: '一年前那件事，你现在还好吗？'
-    },
-    {
-      type: 'dialogue',
-      text: '我点点头，没有回答。'
-    }
-  ]
-}
-```
-
-## 游戏机制
-
-### 时间输入
-
-玩家输入时间 (HH:MM) 来触发对应的剧本片段。
-
-### 两问一锁
-
-某些关键时间点需要两次输入：
-1. 第一次输入主时间（如 `10:37`）
-2. 第二次输入辅助时间（如 `08:20`）
-3. 系统根据组合匹配对应的片段
-
-### Flag 系统
-
-使用 flag 来控制剧本的解锁和流程：
-- `unlockFlags`: 片段解锁所需的条件
-- 选择分支可以设置 flag
-- 游戏状态中维护已解锁的 flag 集合
-
-## 开发说明
-
-- 使用 Vue 3 Composition API
-- TypeScript 严格模式
-- 响应式设计，适配不同屏幕尺寸
-- 支持文本格式标记（红色、粗体、斜体）
-
-## 待实现功能
-
-- [ ] 选择分支的跳转逻辑
-- [ ] 命令行的执行（setFlag、jump 等）
-- [ ] 存档/读档功能
-- [ ] 文本逐字显示效果
-- [ ] 音效和背景音乐支持
-- [ ] 更多视觉效果
-
+Agentation 要求 React 18+，不支持移动端浏览器。
