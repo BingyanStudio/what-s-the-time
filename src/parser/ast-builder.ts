@@ -330,6 +330,8 @@ export class ScriptAstBuilder {
         params.segmentId = parts.slice(1).join(" ");
         break;
       case "end":
+        params.message = parts.slice(1).join(" ");
+        break;
       case "return":
         break;
       default:

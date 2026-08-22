@@ -8,6 +8,8 @@ import type { ParseResult, ParserOptions, ScriptSegment } from "@/types";
 import { ScriptAstBuilder } from "./ast-builder";
 import { ScriptTokenizer } from "./tokenizer";
 
+export { parseText } from "./text-parser";
+
 export class ScriptParser {
   private tokenizer: ScriptTokenizer;
   private astBuilder: ScriptAstBuilder;

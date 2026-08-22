@@ -1,5 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import type { ChoiceLine, DialogueLine, NarrationLine } from "@/types";
+import type {
+  ChoiceLine,
+  CommandLine,
+  DialogueLine,
+  NarrationLine,
+} from "@/types";
 import { parseScript } from "../index";
 
 describe("剧本解析器", () => {
@@ -127,6 +132,21 @@ setFlag FLAG_TEST
     const segment = parseScript(content);
     expect(segment.lines).toHaveLength(1);
     expect(segment.lines[0].type).toBe("command");
+  });
+
+  it("应该保留 end 命令的结束文本", () => {
+    const content = `
+---
+id: TEST-END
+time: START
+---
+command
+end 游戏结束
+`;
+    const segment = parseScript(content);
+    const line = segment.lines[0] as CommandLine;
+    expect(line.command).toBe("end");
+    expect(line.params.message).toBe("游戏结束");
   });
 
   it("应该正确解析输入行", () => {
