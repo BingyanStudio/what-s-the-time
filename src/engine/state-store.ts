@@ -1,101 +1,113 @@
 /**
- * 状态管理 Store
+ * 游戏状态仓库。
  *
- * 单一数据源，管理游戏状态和显示状态。
+ * 引擎通过不可变快照写入，React 通过 useSyncExternalStore 订阅。
  */
-
-import { reactive, readonly } from "vue";
 import type { DisplayState, GameState, LineStatus } from "@/types";
 
-class StateStore {
-  private _gameState = reactive<GameState>({
+export interface GameSnapshot {
+  gameState: GameState;
+  displayState: DisplayState;
+  lineStates: Map<string, LineStatus>;
+}
+
+const createSnapshot = (): GameSnapshot => ({
+  gameState: {
     currentLoop: "A",
-    unlockedFlags: new Set<string>(),
-    viewedSegments: new Set<string>(),
+    unlockedFlags: new Set(),
+    viewedSegments: new Set(),
     currentTime: undefined,
     choiceHistory: [],
-  });
-
-  private _displayState = reactive<DisplayState>({
+  },
+  displayState: {
     currentSegment: null,
     currentLineIndex: 0,
     displayedLines: [],
     typingRefs: new Map(),
     pendingSideEffects: [],
-  });
+  },
+  lineStates: new Map(),
+});
 
-  private _lineStates = reactive<Map<string, LineStatus>>(new Map());
+class StateStore {
+  private snapshot = createSnapshot();
+  private listeners = new Set<() => void>();
 
-  // 只读访问
   get gameState(): Readonly<GameState> {
-    return readonly(this._gameState) as Readonly<GameState>;
+    return this.snapshot.gameState;
   }
 
   get displayState(): Readonly<DisplayState> {
-    return readonly(this._displayState) as Readonly<DisplayState>;
+    return this.snapshot.displayState;
   }
 
   get lineStates(): Readonly<Map<string, LineStatus>> {
-    return readonly(this._lineStates) as Readonly<Map<string, LineStatus>>;
+    return this.snapshot.lineStates;
   }
 
-  // 内部可写访问（供 engine 层使用）
-  get _internal(): {
-    gameState: GameState;
-    displayState: DisplayState;
-    lineStates: Map<string, LineStatus>;
-  } {
-    return {
-      gameState: this._gameState,
-      displayState: this._displayState,
-      lineStates: this._lineStates,
-    };
+  get _internal(): GameSnapshot {
+    return this.snapshot;
+  }
+
+  getSnapshot = (): GameSnapshot => this.snapshot;
+
+  subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  private publish(updates: Partial<GameSnapshot>): void {
+    this.snapshot = { ...this.snapshot, ...updates };
+    for (const listener of this.listeners) listener();
   }
 
   updateGameState(updates: Partial<GameState>): void {
-    Object.assign(this._gameState, updates);
+    this.publish({
+      gameState: { ...this.snapshot.gameState, ...updates },
+    });
   }
 
   updateDisplayState(updates: Partial<DisplayState>): void {
-    Object.assign(this._displayState, updates);
+    this.publish({
+      displayState: { ...this.snapshot.displayState, ...updates },
+    });
   }
 
   updateLineState(lineId: string, status: LineStatus): void {
-    this._lineStates.set(lineId, status);
+    const lineStates = new Map(this.snapshot.lineStates);
+    lineStates.set(lineId, status);
+    const displayedLines = this.snapshot.displayState.displayedLines.map(
+      (line) => (line.id === lineId ? { ...line, status } : line),
+    );
+    this.publish({
+      lineStates,
+      displayState: { ...this.snapshot.displayState, displayedLines },
+    });
   }
 
   updateLineStates(updates: Map<string, LineStatus>): void {
-    for (const [id, status] of updates) {
-      this._lineStates.set(id, status);
-    }
+    const lineStates = new Map(this.snapshot.lineStates);
+    for (const [id, status] of updates) lineStates.set(id, status);
+    this.publish({ lineStates });
   }
 
-  batchUpdate(updates: {
-    gameState?: Partial<GameState>;
-    displayState?: Partial<DisplayState>;
-    lineStates?: Map<string, LineStatus>;
-  }): void {
-    if (updates.gameState) this.updateGameState(updates.gameState);
-    if (updates.displayState) this.updateDisplayState(updates.displayState);
-    if (updates.lineStates) this.updateLineStates(updates.lineStates);
+  batchUpdate(updates: Partial<GameSnapshot>): void {
+    this.publish({
+      gameState: updates.gameState
+        ? { ...this.snapshot.gameState, ...updates.gameState }
+        : this.snapshot.gameState,
+      displayState: updates.displayState
+        ? { ...this.snapshot.displayState, ...updates.displayState }
+        : this.snapshot.displayState,
+      lineStates: updates.lineStates
+        ? new Map(updates.lineStates)
+        : this.snapshot.lineStates,
+    });
   }
 
   reset(): void {
-    Object.assign(this._gameState, {
-      currentLoop: "A",
-      unlockedFlags: new Set<string>(),
-      viewedSegments: new Set<string>(),
-      currentTime: undefined,
-      choiceHistory: [],
-    });
-    Object.assign(this._displayState, {
-      currentSegment: null,
-      currentLineIndex: 0,
-      displayedLines: [],
-      typingRefs: new Map(),
-      pendingSideEffects: [],
-    });
-    this._lineStates.clear();
+    this.snapshot = createSnapshot();
+    for (const listener of this.listeners) listener();
   }
 }
 

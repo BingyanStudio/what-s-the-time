@@ -5,7 +5,7 @@
  * 匹配后替换为 timeDisplay 行并插入内联后续内容。
  */
 
-import { useSystemTime } from "@/composables/useSystemTime";
+import { getCurrentSystemTime } from "@/hooks/useSystemTime";
 import type { ContentLine, DisplayedLine, LineStatus } from "@/types";
 import { stateStore } from "./state-store";
 
@@ -19,7 +19,6 @@ class TimeChoiceService {
     const status = stateStore.lineStates.get(lineId);
     if (status === "completed" || status === "disabled") return;
 
-    const { getCurrentSystemTime } = useSystemTime();
     const systemTime = getCurrentSystemTime();
 
     // 查找匹配的选项
@@ -49,9 +48,11 @@ class TimeChoiceService {
       stateStore.updateGameState({ unlockedFlags: flags });
     }
 
-    gameState.choiceHistory.push({
-      choiceText: `时间: ${time}`,
-      timestamp: Date.now(),
+    stateStore.updateGameState({
+      choiceHistory: [
+        ...gameState.choiceHistory,
+        { choiceText: `时间: ${time}`, timestamp: Date.now() },
+      ],
     });
 
     // 替换 timeChoice 为 timeDisplay + 插入内联行

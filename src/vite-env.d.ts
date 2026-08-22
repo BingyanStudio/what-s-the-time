@@ -37,11 +37,3 @@ declare module "*.wav" {
   const src: string;
   export default src;
 }
-
-declare module "*.vue" {
-  import type { DefineComponent } from "vue";
-
-  // biome-ignore lint/complexity/noBannedTypes: Vite 标准 Vue 模块声明
-  const component: DefineComponent<{}, {}, any>;
-  export default component;
-}

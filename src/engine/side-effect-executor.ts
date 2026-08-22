@@ -1,84 +1,57 @@
 /**
- * 副作用执行器
+ * 执行引擎声明的 UI 副作用。
  *
- * 响应状态变化自动执行副作用（打字动画、聚焦等）。
+ * 订阅框架无关的状态仓库，并在 React 提交 DOM 后启动动画或聚焦。
  */
-
-import { nextTick, watchEffect } from "vue";
 import { INPUT_FOCUS_DELAY } from "@/constants";
 import type { SideEffect } from "@/types";
 import { stateStore } from "./state-store";
 
 class SideEffectExecutor {
   private initialized = false;
+  private processing = false;
 
   init(): void {
     if (this.initialized) return;
-
-    watchEffect(() => {
-      const effects = stateStore.displayState.pendingSideEffects;
-      if (effects.length > 0) {
-        nextTick(() => {
-          for (const effect of effects) {
-            this.execute(effect);
-          }
-          stateStore.updateDisplayState({ pendingSideEffects: [] });
-        });
-      }
-    });
-
     this.initialized = true;
+    stateStore.subscribe(() => this.flush());
+    this.flush();
+  }
+
+  private flush(): void {
+    const effects = stateStore.displayState.pendingSideEffects;
+    if (this.processing || effects.length === 0) return;
+    this.processing = true;
+    stateStore.updateDisplayState({ pendingSideEffects: [] });
+    requestAnimationFrame(() => {
+      for (const effect of effects) this.execute(effect);
+      this.processing = false;
+      this.flush();
+    });
   }
 
   private execute(effect: SideEffect): void {
-    const delay = effect.delay || 0;
-
-    if (delay > 0) {
-      setTimeout(() => this.executeImmediate(effect), delay);
-    } else {
-      this.executeImmediate(effect);
-    }
+    const run = () => this.executeImmediate(effect);
+    effect.delay ? window.setTimeout(run, effect.delay) : run();
   }
 
   private executeImmediate(effect: SideEffect): void {
-    switch (effect.type) {
-      case "startTyping":
-        this.startTyping(effect.target as number);
-        break;
-      case "focusInput":
-        this.focusInput();
-        break;
-      case "scrollToLine":
-        // 滚动由 GameView 的 watch 处理
-        break;
+    if (effect.type === "startTyping") {
+      this.startTyping(effect.target as number);
+    } else if (effect.type === "focusInput") {
+      window.setTimeout(() => {
+        document.querySelector<HTMLInputElement>(".time-input-char")?.focus();
+      }, INPUT_FOCUS_DELAY);
     }
   }
 
   private startTyping(lineIndex: number): void {
-    const { displayState } = stateStore._internal;
-    const typingComponent = displayState.typingRefs.get(lineIndex);
-
-    if (typingComponent?.startTyping) {
-      typingComponent.startTyping();
-    } else {
-      // 组件可能还未挂载，延迟重试
-      setTimeout(() => {
-        const comp =
-          stateStore._internal.displayState.typingRefs.get(lineIndex);
-        if (comp?.startTyping) {
-          comp.startTyping();
-        }
-      }, 50);
-    }
-  }
-
-  private focusInput(): void {
-    setTimeout(() => {
-      const input = document.querySelector<HTMLInputElement>(
-        ".time-input input, .time-input-char",
-      );
-      input?.focus();
-    }, INPUT_FOCUS_DELAY);
+    const start = () => {
+      const component = stateStore.displayState.typingRefs.get(lineIndex);
+      component?.startTyping?.();
+      return Boolean(component?.startTyping);
+    };
+    if (!start()) window.setTimeout(start, 50);
   }
 }
 

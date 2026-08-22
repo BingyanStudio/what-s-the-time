@@ -26,9 +26,10 @@ class NavigationService {
     );
 
     if (segment) {
-      gameState.viewedSegments.add(segment.id);
+      const viewedSegments = new Set(gameState.viewedSegments);
+      viewedSegments.add(segment.id);
       this.loadSegment(segment);
-      stateStore.updateGameState({ currentTime: time });
+      stateStore.updateGameState({ currentTime: time, viewedSegments });
     } else {
       const blank = findSegment("*");
       if (blank) {
@@ -46,11 +47,6 @@ class NavigationService {
   }
 
   private loadSegment(segment: ScriptSegment): void {
-    const lineStates = stateStore._internal.lineStates;
-    for (let i = 0; i < segment.lines.length; i++) {
-      lineStates.delete(`${segment.id}-${i}`);
-    }
-
     const displayedLines: DisplayedLine[] = segment.lines.map((line, i) => ({
       ...line,
       id: `${segment.id}-${i}`,

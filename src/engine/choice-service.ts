@@ -40,9 +40,11 @@ class ChoiceService {
     }
 
     // 记录选择历史
-    gameState.choiceHistory.push({
-      choiceText: choice.text,
-      timestamp: Date.now(),
+    stateStore.updateGameState({
+      choiceHistory: [
+        ...gameState.choiceHistory,
+        { choiceText: choice.text, timestamp: Date.now() },
+      ],
     });
 
     // 更新选中状态 + 插入内联行
