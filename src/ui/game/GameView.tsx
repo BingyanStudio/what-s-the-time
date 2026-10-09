@@ -13,6 +13,7 @@ import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import type { ChoiceLine, CommandLine, DisplayedLine } from "@/types";
 import { WatchDisplay } from "@/ui/display/WatchDisplay";
 import { LineRenderer } from "@/ui/lines/LineRenderer";
+import { ScrollBar } from "@/ui/shared/ScrollBar";
 import type { TypingTextHandle } from "@/ui/shared/TypingText";
 import { BackToStartButton } from "./BackToStartButton";
 
@@ -112,40 +113,43 @@ export function GameView() {
   return (
     <main className="game-view">
       <WatchDisplay displayTime={gameState.currentTime} />
-      <div
-        ref={textContainerRef}
-        className="text-container"
-        role="application"
-        aria-label="文字冒险游戏区域"
-        onClick={keyboard.handleTextClick}
-        onKeyDown={() => undefined}
-      >
-        {displayState.currentSegment && (
-          <div className="text-content">
-            {displayState.displayedLines.map(
-              (line, index) =>
-                shouldShowLine(line, index) && (
-                  <LineRenderer
-                    key={line.id}
-                    ref={(element) => {
-                      if (element) lineRefs.current.set(index, element);
-                      else lineRefs.current.delete(index);
-                    }}
-                    line={line}
-                    index={index}
-                    currentLineIndex={displayState.currentLineIndex}
-                    onTypingRef={onTypingRef}
-                    onLineComplete={onLineComplete}
-                    onChoice={onChoice}
-                    onTimeChoice={onTimeChoice}
-                    onInputComplete={onInputComplete}
-                    onCommand={onCommand}
-                  />
-                ),
-            )}
-            {showBackButton && <BackToStartButton onClick={backToStart} />}
-          </div>
-        )}
+      <div className="text-viewport">
+        <div
+          ref={textContainerRef}
+          className="text-container"
+          role="application"
+          aria-label="文字冒险游戏区域"
+          onClick={keyboard.handleTextClick}
+          onKeyDown={() => undefined}
+        >
+          {displayState.currentSegment && (
+            <div className="text-content">
+              {displayState.displayedLines.map(
+                (line, index) =>
+                  shouldShowLine(line, index) && (
+                    <LineRenderer
+                      key={line.id}
+                      ref={(element) => {
+                        if (element) lineRefs.current.set(index, element);
+                        else lineRefs.current.delete(index);
+                      }}
+                      line={line}
+                      index={index}
+                      currentLineIndex={displayState.currentLineIndex}
+                      onTypingRef={onTypingRef}
+                      onLineComplete={onLineComplete}
+                      onChoice={onChoice}
+                      onTimeChoice={onTimeChoice}
+                      onInputComplete={onInputComplete}
+                      onCommand={onCommand}
+                    />
+                  ),
+              )}
+              {showBackButton && <BackToStartButton onClick={backToStart} />}
+            </div>
+          )}
+        </div>
+        <ScrollBar targetRef={textContainerRef} />
       </div>
     </main>
   );

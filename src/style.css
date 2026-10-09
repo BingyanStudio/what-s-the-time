@@ -71,12 +71,83 @@ body {
   transform: translateX(-50%);
 }
 
-.text-container {
+/* 文字区视口：包裹滚动容器，为自定义滚动条提供定位参照 */
+.text-viewport {
+  position: relative;
   flex: 1;
+  min-height: 0;
+}
+
+.text-container {
+  height: 100%;
   padding: 20px;
   overflow-y: auto;
   background: rgba(20, 20, 20, 0.9);
   outline: none;
+  /* 隐藏原生滚动条，改由 ScrollBar 组件渲染 */
+  scrollbar-width: none;
+}
+
+.text-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* 自定义滚动条：覆盖在文字区右缘，延续整体黑白极简风格 */
+.scroll-bar {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  bottom: 8px;
+  width: 12px;
+  touch-action: none;
+  transition: opacity 0.3s;
+}
+
+.scroll-bar[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-bar-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.scroll-bar-thumb {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  width: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  cursor: grab;
+  transition: background 0.2s;
+}
+
+.scroll-bar:hover .scroll-bar-thumb,
+.scroll-bar-dragging .scroll-bar-thumb {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.scroll-bar-dragging .scroll-bar-thumb {
+  cursor: grabbing;
+}
+
+/* 当前滚动位置百分比：跟随滑块上下移动 */
+.scroll-bar-percent {
+  position: absolute;
+  right: calc(100% + 6px);
+  color: rgba(255, 255, 255, 0.4);
+  font:
+    11px / 1 "Courier New",
+    monospace;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .text-content {
